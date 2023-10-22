@@ -23,9 +23,7 @@ classdef Test
         % Output: Status    - 0:Movement incomplete
         %                   - 1: Stamp picked up and passport stamped.
         function [status] = VP6242Task()
-        
-        
-            function [QMatrix] = Tragectory(startQ, EndQ, Steps)
+       
 
         end
     end
