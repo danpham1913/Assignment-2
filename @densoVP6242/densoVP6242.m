@@ -31,14 +31,14 @@ function self = densoVP6242(baseTr,useTool,toolFilename)
 %% Create the robot model
         function CreateModel(self)   
             % Create the densoVP6242 model 
-            link(1) = Link('d',0.281,'a',0,'alpha',pi/2,'offset',0, 'qlim',[-pi pi]);
-            link(2) = Link('d',0,'a',0.212,'alpha',0,'offset',pi/2, 'qlim',[-pi pi]);
-            link(3) = Link('d',0,'a',0,'alpha',pi/2,'offset',pi/2, 'qlim',[-pi pi]);
+            link(1) = Link('d',0.281,'a',0,'alpha',pi/2,'offset',0, 'qlim',[-deg2rad(160) deg2rad(160)]);
+            link(2) = Link('d',0,'a',0.212,'alpha',0,'offset',pi/2, 'qlim',[-deg2rad(120) deg2rad(120)]);
+            link(3) = Link('d',0,'a',0,'alpha',pi/2,'offset',pi/2, 'qlim',[-deg2rad(70) deg2rad(71)]);
             link(4) = Link('d',0.075,'a',0.117,'alpha',pi/2,'offset',0, 'qlim',[0 0]);
             link(5) = Link('d',0,'a',0,'alpha',pi/2,'offset',pi/2, 'qlim',[0 0]);
-            link(6) = Link('d',0.1,'a',0,'alpha',pi/2,'offset',deg2rad(0), 'qlim',[-pi pi]);
-            link(7) = Link('d',0,'a',0,'alpha',-pi/2,'offset',0, 'qlim',[-pi pi]);
-            link(8) = Link('d',0.175,'a',0,'alpha',0,'offset',0, 'qlim',[-pi pi]);
+            link(6) = Link('d',0.1,'a',0,'alpha',pi/2,'offset',deg2rad(0), 'qlim',[-deg2rad(160) deg2rad(160)]);
+            link(7) = Link('d',0,'a',0,'alpha',-pi/2,'offset',0, 'qlim',[-deg2rad(120) deg2rad(120)]);
+            link(8) = Link('d',0.175,'a',0,'alpha',0,'offset',0, 'qlim',[-2*pi 2*pi]);
             self.model = SerialLink(link,'name',self.name);
         end
      
