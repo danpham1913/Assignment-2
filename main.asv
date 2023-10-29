@@ -15,11 +15,10 @@ VP6242 = densoVP6242(transl(0,-0.3,0.6)*trotz(-pi/2));
 %% Load Objects
 %Load Passport
 passport = PlaceObject('passport_ply.PLY',[0.15 0.22 1.00]);
-passportverts = get(passport,'Vertices');
+PPvertices = get(passport,'Vertices');
 %Load Stamp
 stamp = PlaceObject('passport_ply.PLY',[0.15 0.22 1.00]);
-stampVerts = get(passport,'Vertices');
-
+stampVer = get(passport,'Vertices');
 %% Establish Flags
 %Passport Location Flag
 

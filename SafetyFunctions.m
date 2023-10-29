@@ -5,8 +5,10 @@ classdef Test
     end
 
     methods (Static)
-        function sayOK()
+        function Action = EmergencyStop(Robot)
 fprintf('OK\n');
+
+Action = 
         end
         function sayNO()
 fprintf('NO\n');

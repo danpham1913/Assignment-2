@@ -6,19 +6,19 @@ clear
 %Environment
 Environment
 
-%Robot LinearUR3
-robot = densoVP6242(transl(-0.2,-0.4,0.60)*trotz(-pi/2));
+% Load Robots
+robot = densoVP6242(transl(0,-0.3,0.6)*trotz(-pi/2));
 robot_q = robot.model.getpos;
 % robot.model.animate(robot_q);
 initial_ee = robot.model.fkine(robot_q);
-robot2 = UR3(transl(-0.15,0.20,0.65));
+robot2 = UR3(transl(0,0.3,0.7));
 robot2_q = robot2.model.getpos;
 
-%Placing Bricks
+%Placing passport
 passport = PlaceObject('passport_ply.PLY',[0.15 0.22 1.00]);
 vertspp1 = get(passport,'Vertices');
-% set(brick1,'Vertices',vertsb1(:,1:3))
 
+%% 
 %UR3 movement path
 
 % b1_ee0 = transl(0.20,0.25,1.21);
@@ -30,19 +30,16 @@ q1_end = robot2.model.ikcon(transl(-1.5,-0.5,0.8)* troty(pi));
 
 steps = 50;
 
-q1Matrix_1 = jtraj(robot2_q,qb1,steps); %initial to brick
-q1Matrix_2 = jtraj(qb1,qb2,steps); %brick to end brick
-q_3 = jtraj(qb2,robot2_q,steps); %end brick back to initial
+% q1Matrix_1 = jtraj(robot2_q,qb1,steps); %initial to brick
+% q1Matrix_2 = jtraj(qb1,qb2,steps); %brick to end brick
+% q_3 = jtraj(                                         qb2,robot2_q,steps); %end brick back to initial
 
 
 for j = 1:size(q_1,1)                                             % animate trajectory
     robot2.model.animate(q_1(j,:));
-    tr = robot2.model.fkine(q_1(j,:)).T;
-%     transformVertBrick1 = [vertsb1, ones(size(vertsb1,1),1)]*tr';
-%     set(brick1,'Vertices',transformVertBrick1(:,1:3));
     drawnow(); 
 end
-
+%%
 trfix = inv(robot2.model.fkine(robot2.model.getpos).T) * [vertspp1, ones(size(vertspp1,1),1)]';
 
 
@@ -56,7 +53,7 @@ for j = 1:size(q_2,1)                                             % animate traj
     set(passport,'Vertices',trvert);
     drawnow(); 
 end
-
+%%
 for j = 1:size(q_3,1)                                             % animate trajectory
     robot2.model.animate(q_3(j,:));
 %     tr = robot.model.fkine(q_2(j,:)).T;
