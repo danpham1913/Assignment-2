@@ -7,15 +7,15 @@ clear
 Environment
 
 %Robot LinearUR3
-robot = densoVP6242(transl(-0.25,-0.45,0.75));
+robot = densoVP6242(transl(-0.2,-0.4,0.60)*trotz(-pi/2));
 robot_q = robot.model.getpos;
 % robot.model.animate(robot_q);
 initial_ee = robot.model.fkine(robot_q);
-robot2 = UR3(transl(-0.2,0.25,0.8));
+robot2 = UR3(transl(-0.15,0.20,0.65));
 robot2_q = robot2.model.getpos;
 
 %Placing Bricks
-passport = PlaceObject('passport_ply.PLY',[0.20 0.25 1.21]);
+passport = PlaceObject('passport_ply.PLY',[0.15 0.22 1.00]);
 vertspp1 = get(passport,'Vertices');
 % set(brick1,'Vertices',vertsb1(:,1:3))
 
@@ -23,17 +23,15 @@ vertspp1 = get(passport,'Vertices');
 
 % b1_ee0 = transl(0.20,0.25,1.21);
 % b1_eeF = transl(-0.4,0.15,0.8);
-qb1 = robot2.model.ikcon(transl(0.20,0.25,1.21) * troty(pi));
-qb2 = robot2.model.ikcon(transl(-0.20,0.25,1.21)*troty(pi));
-
-
-qb_end = robot2.model.ikcon(transl(-1.5,-0.5,0.8)* troty(pi));
+q1_1 = robot2.model.ikcon(transl(0.20,0.25,1.21) * troty(pi));
+q1_2 = robot2.model.ikcon(transl(-0.20,0.25,1.21)*troty(pi));
+q1_end = robot2.model.ikcon(transl(-1.5,-0.5,0.8)* troty(pi));
 
 
 steps = 50;
 
-q_1 = jtraj(robot2_q,qb1,steps); %initial to brick
-q_2 = jtraj(qb1,qb2,steps); %brick to end brick
+q1Matrix_1 = jtraj(robot2_q,qb1,steps); %initial to brick
+q1Matrix_2 = jtraj(qb1,qb2,steps); %brick to end brick
 q_3 = jtraj(qb2,robot2_q,steps); %end brick back to initial
 
 
