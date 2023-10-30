@@ -192,6 +192,7 @@ for j = 1:size(q2Matrix_8,1)                                             % anima
     drawnow(); 
 end
 
+%UR3 return path
 for j = 1:size(q1Matrix_5,1)                                             % animate trajectory
     robot2.model.animate(q1Matrix_5(j,:));
     drawnow(); 
