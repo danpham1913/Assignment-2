@@ -33,7 +33,7 @@ classdef PSRFunctions
         % Output:   - Trajectory: Array to of q angles get from qStart to qEnd
         %           - CurrentStep: Current Step performed by Trajectory
         %           - ObjectVerts: Object New Data returned.
-        function [trajectory,currentStep,ObjectVerts] = moveTo(QStart,QEnd,Robot,Object,ObjectVerts)
+        function [ObjectVerts] = moveTo(QStart,QEnd,Robot,UserGui,Object,ObjectVerts)
             % Check if Object is provided
             if nargin > 4
                 trfix = inv(Robot.model.fkine(Robot.model.getpos).T) * [ObjectVerts, ones(size(ObjectVerts,1),1)]';
@@ -55,24 +55,26 @@ classdef PSRFunctions
 
             % animate trajectory
             for i = 1:size(trajectory,1)
+
                 Robot.model.animate(trajectory(i,:));
                 if ObjectAttached == 1
+                    if UserGui.Lamp_2.Color == [1,0,0];
+                        PSRFunctions.EStopFunction(trajectory(i,:),Robot,UserGui,Object,ObjectVerts);
+                    end
                     UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
                     trvert = UpdateObject(1:3,:)';
                     set(Object,'Vertices',trvert);
+                    ObjectVerts = get(Object,'Vertices');   %Return objectvertices so they are updated when called
+                else
+                    if UserGui.Lamp_2.Color == [1,0,0];
+                        PSRFunctions.EStopFunction(trajectory(i,:),Robot,UserGui);
+                    end
                 end
-
-                currentStep = i;
                 drawnow;
-                pause(0);
-            end
-
-            %Return objectvertices so they are updated when called
-            if ObjectAttached == 1
-                ObjectVerts = get(Object,'Vertices');
+                pause(0);   
             end
         end
-       
+
         %% **loadPassport Function***
         % Brief: Load a passport and animate the slide in entry
         % Inputs: - Nil
@@ -90,5 +92,54 @@ classdef PSRFunctions
             end
             PassportVerts = get(passport,'Vertices');
         end
+
+        %% **DoorOpen Function***
+        % Brief: Load a passport and animate the slide in entry
+        % Inputs: - Nil
+        % Output: - passport: Return Passport Object
+        %         - PassportVerts: Return Passport Object Data
+        function EStopFunction(QStart,Robot,UserGui,Object,ObjectVerts)
+            if nargin > 3
+                trfix = inv(Robot.model.fkine(Robot.model.getpos).T) * [ObjectVerts, ones(size(ObjectVerts,1),1)]';
+                ObjectAttached = 1;
+            else
+                ObjectAttached = 0;
+            end
+            QEnd = zeros(size(QStart,1),1);
+            trajectory = jtraj(QStart,QEnd,100);
+            for i = 1:size(trajectory,1)
+                Robot.model.animate(trajectory(i,:));
+                if ObjectAttached == 1
+                    UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
+                    trvert = UpdateObject(1:3,:)';
+                    set(Object,'Vertices',trvert);
+                end
+                drawnow;
+                pause(0);
+            end
+
+            while UserGui.Lamp_2.Color == [1,0,0]
+                pause(0);
+            end
+            for i = size(trajectory,1):-1:1
+                Robot.model.animate(trajectory(i,:));
+                if ObjectAttached == 1
+                    UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
+                    trvert = UpdateObject(1:3,:)';
+                    set(Object,'Vertices',trvert);
+                end
+                drawnow;
+                pause(0);
+            end
+        end
+
     end
 end
+
+
+
+
+
+
+
+
