@@ -3,7 +3,7 @@ function Environment()
 hold on
 
 %Set up workspace
-axis ([-5 5 -4 4 0 3])
+axis ([-1 1.3 -1 1 0 2.5]);
 axis equal;  
 xlabel ('X');
 ylabel ('Y');
@@ -20,8 +20,8 @@ grid on;
 % PlaceObject('tableBrown2.1x1.4x0.5m.ply',[1 0 0])
 % PlaceObject('fenceAssemblyGreenRectangle4x8x2.5m.ply')
 % PlaceObject('Worker.ply',[2 3 0])
-PlaceObject('personFemaleBusiness.ply',[0.75 0 0])
- PlaceObject('ColoredRoom.ply',[0 0 1])
+PlaceObject('personFemaleBusiness.ply',[0.75 0 0]);
+ PlaceObject('ColoredRoom.ply',[0 0 1]);
 % PlaceObject('stampper_ply.ply',[0 0 0.8])
 camlight
 
