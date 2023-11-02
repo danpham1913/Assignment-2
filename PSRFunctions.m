@@ -10,15 +10,29 @@ classdef PSRFunctions
         function Environment()
             hold on
             %Set up workspace
-            axis ([-1 1.3 -1 1 0 2.5]);
+            axis ([-2 4 -1.5 1.5 0 3])
             axis equal;
             xlabel ('X');
             ylabel ('Y');
             zlabel ('Z');
             grid on;
-            PlaceObject('personFemaleBusiness.ply',[0.75 0 0]);
-            PlaceObject('ColoredRoom.ply',[0 0 1]);
-            % PlaceObject('fullroom_ply.ply',[0.175 0.1 1]);
+
+            %Set up walls
+            surf([-2,-2;4,4],[-1.5,1.5;-1.5,1.5],[0.01,0.01;0.01,0.01],'CData',imread('floor.jpg'),'FaceColor','texturemap');
+            surf([-2,4;-2,4],[-1.5,-1.5;-1.5,-1.5],[3,3;0.01,0.01],'CData',imread('Screenshot(2).jpg'),'FaceColor','texturemap');
+            surf([4,4;4,4],[-1.5,1.5;-1.5,1.5],[3,3;0.01,0.01],'CData',imread('Screenshot(3).jpg'),'FaceColor','texturemap');
+            surf([-0.6,-0.4;-0.6,-0.4],[-0.85,-0.85;-0.85,-0.85],[1,1;1.2,1.2],'CData',imread('Warning.jpg'),'FaceColor','texturemap');
+
+            %Add objects
+            PlaceObject('personMaleCasual.ply',[0.85 0 0]);
+            PlaceObject('personFemaleBusiness.ply',[1.5 0 0]);
+            PlaceObject('fullroom2_ply (1).PLY',[0 0 1]);
+            PlaceObject('personMaleOld.ply',[2.25 0 0]);
+            PlaceObject('suitcase.ply',[2.25 0 0]);
+            PlaceObject('suitcase2.ply',[0.85 0.25 0]);
+            PlaceObject('suitcase.ply',[1.5 1 0]);
+            PlaceObject('fireExtinguisher.ply',[0 0.8 0]);
+            PlaceObject('emergencyStopButton.ply',[-0.8 -0.8 1]);
             camlight
         end
 
@@ -55,13 +69,12 @@ classdef PSRFunctions
 
             % animate trajectory
             for i = 1:size(trajectory,1)
-
                 Robot.model.animate(trajectory(i,:));
                 if ObjectAttached == 1
                     if UserGui.Lamp_2.Color == [1,0,0];
                         PSRFunctions.EStopFunction(UserGui);
                     elseif UserGui.DoorOpenLamp.Color == [1,0,0];
-                        PSRFunctions.DoorOpenFunction(trajectory(i,:),Robot,Robot2,UserGui,Object,ObjectVerts)
+                        PSRFunctions.DoorOpenFunction(Robot,Robot2,UserGui,Object,ObjectVerts) 
                     end
                     UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
                     trvert = UpdateObject(1:3,:)';
@@ -100,20 +113,21 @@ classdef PSRFunctions
         % Inputs: - Nil
         % Output: - passport: Return Passport Object
         %         - PassportVerts: Return Passport Object Data
-        function DoorOpenFunction(QStart1,Robot,Robot2,UserGui,Object,ObjectVerts)
-            if nargin > 4
+        function DoorOpenFunction(Robot,Robot2,UserGui,Object,ObjectVerts)
+            if nargin > 3
                 trfix = inv(Robot.model.fkine(Robot.model.getpos).T) * [ObjectVerts, ones(size(ObjectVerts,1),1)]';
                 ObjectAttached = 1;
             else
                 ObjectAttached = 0;
             end
-
+            QStart1 = Robot.model.getpos;
             QEnd1 = zeros(size(QStart1,1),1);
-            QStart2 = Robot2.model.getpos
+            QStart2 = Robot2.model.getpos;
             QEnd2 = zeros(size(QStart2,1),1);
             trajectory1 = jtraj(QStart1,QEnd1,100);
             trajectory2 = jtraj(QStart2,QEnd2,100);
             for i = 1:size(trajectory1,1)
+                
                 Robot.model.animate(trajectory1(i,:));
                 if ObjectAttached == 1
                     UpdateObject = Robot.model.fkine(trajectory1(i,:)).T * trfix;
@@ -148,7 +162,7 @@ classdef PSRFunctions
                 pause(0);
             end
         end
-        %% **DoorOpen Function***
+        %% **EStop Function***
         % Brief: Load a passport and animate the slide in entry
         % Inputs: - Nil
         % Output: - passport: Return Passport Object
@@ -157,7 +171,6 @@ classdef PSRFunctions
             while UserGui.Lamp_2.Color == [1,0,0]
                 pause(5);
             end
-
         end
     end
 end

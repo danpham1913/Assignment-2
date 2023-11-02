@@ -19,15 +19,15 @@ surf([-0.6,-0.4;-0.6,-0.4],[-0.85,-0.85;-0.85,-0.85],[1,1;1.2,1.2],'CData',imrea
 %Add objects
 % PlaceObject('tableBrown2.1x1.4x0.5m.ply',[1 0 0])
 % PlaceObject('fenceAssemblyGreenRectangle4x8x2.5m.ply')
-PlaceObject('personMaleCasual.ply',[0.85 0 0])
-PlaceObject('personFemaleBusiness.ply',[1.5 0 0])
-PlaceObject('fullroom2_ply (1).PLY',[0 0 1])
-PlaceObject('door.PLY',[0 0 1])
-PlaceObject('personMaleOld.ply',[2.25 0 0])
-PlaceObject('suitcase.ply',[2.25 0 0])
-PlaceObject('suitcase2.ply',[0.85 0.25 0])
-PlaceObject('suitcase.ply',[1.5 1 0])
-PlaceObject('fireExtinguisher.ply',[0 0.8 0])
-PlaceObject('emergencyStopButton.ply',[-0.8 -0.8 1])
+PlaceObject('personMaleCasual.ply',[0.85 0 0]);
+PlaceObject('personFemaleBusiness.ply',[1.5 0 0]);
+PlaceObject('fullroom2_ply (1).PLY',[0 0 1]);
+PlaceObject('door.PLY',[0 0 1]);
+PlaceObject('personMaleOld.ply',[2.25 0 0]);
+PlaceObject('suitcase.ply',[2.25 0 0]);
+PlaceObject('suitcase2.ply',[0.85 0.25 0]);
+PlaceObject('suitcase.ply',[1.5 1 0]);
+PlaceObject('fireExtinguisher.ply',[0 0.8 0]);
+PlaceObject('emergencyStopButton.ply',[-0.8 -0.8 1]);
 camlight
 

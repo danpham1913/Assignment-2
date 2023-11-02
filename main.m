@@ -66,9 +66,12 @@ Startup = 1;
 while strcmp(UserGui.SystemSwitch.Value, 'On') || Startup == 1
     % Prompt to Load Passport and continue stamping operation
     if strcmp(UserGui.SystemSwitch.Value, 'On')
-    Startup = 0;
+        Startup = 0;
     end
-    if strcmp(UserGui.SystemSwitch.Value, 'On') && UserGui.LoadNewPassportsButton.Value == 0 
+    if UserGui.DoorOpenLamp.Color == [1,0,0];
+        PSRFunctions.DoorOpenFunction(VP6robot,UR3robot,UserGui);
+    end
+    if strcmp(UserGui.SystemSwitch.Value, 'On') && UserGui.LoadNewPassportsButton.Value == 0
         %Load New Passport
         [passport,PassportVerts] = PSRFunctions.loadPassport;
         UserGui.SystemStatusEditField.Value = 'Passport Entered';
