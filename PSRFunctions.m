@@ -33,9 +33,9 @@ classdef PSRFunctions
         % Output:   - Trajectory: Array to of q angles get from qStart to qEnd
         %           - CurrentStep: Current Step performed by Trajectory
         %           - ObjectVerts: Object New Data returned.
-        function [ObjectVerts] = moveTo(QStart,QEnd,Robot,UserGui,Object,ObjectVerts)
+        function [ObjectVerts] = moveTo(QStart,QEnd,Robot,Robot2,UserGui,Object,ObjectVerts)
             % Check if Object is provided
-            if nargin > 4
+            if nargin > 5
                 trfix = inv(Robot.model.fkine(Robot.model.getpos).T) * [ObjectVerts, ones(size(ObjectVerts,1),1)]';
                 ObjectAttached = 1;
             else
@@ -59,7 +59,9 @@ classdef PSRFunctions
                 Robot.model.animate(trajectory(i,:));
                 if ObjectAttached == 1
                     if UserGui.Lamp_2.Color == [1,0,0];
-                        PSRFunctions.EStopFunction(trajectory(i,:),Robot,UserGui,Object,ObjectVerts);
+                        PSRFunctions.EStopFunction(UserGui);
+                    elseif UserGui.DoorOpenLamp.Color == [1,0,0];
+                        PSRFunctions.DoorOpenFunction(trajectory(i,:),Robot,Robot2,UserGui,Object,ObjectVerts)
                     end
                     UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
                     trvert = UpdateObject(1:3,:)';
@@ -67,11 +69,11 @@ classdef PSRFunctions
                     ObjectVerts = get(Object,'Vertices');   %Return objectvertices so they are updated when called
                 else
                     if UserGui.Lamp_2.Color == [1,0,0];
-                        PSRFunctions.EStopFunction(trajectory(i,:),Robot,UserGui);
+                        PSRFunctions.EStopFunction(UserGui);
                     end
                 end
                 drawnow;
-                pause(0);   
+                pause(0);
             end
         end
 
@@ -98,41 +100,65 @@ classdef PSRFunctions
         % Inputs: - Nil
         % Output: - passport: Return Passport Object
         %         - PassportVerts: Return Passport Object Data
-        function EStopFunction(QStart,Robot,UserGui,Object,ObjectVerts)
-            if nargin > 3
+        function DoorOpenFunction(QStart1,Robot,Robot2,UserGui,Object,ObjectVerts)
+            if nargin > 4
                 trfix = inv(Robot.model.fkine(Robot.model.getpos).T) * [ObjectVerts, ones(size(ObjectVerts,1),1)]';
                 ObjectAttached = 1;
             else
                 ObjectAttached = 0;
             end
-            QEnd = zeros(size(QStart,1),1);
-            trajectory = jtraj(QStart,QEnd,100);
-            for i = 1:size(trajectory,1)
-                Robot.model.animate(trajectory(i,:));
+
+            QEnd1 = zeros(size(QStart1,1),1);
+            QStart2 = Robot2.model.getpos
+            QEnd2 = zeros(size(QStart2,1),1);
+            trajectory1 = jtraj(QStart1,QEnd1,100);
+            trajectory2 = jtraj(QStart2,QEnd2,100);
+            for i = 1:size(trajectory1,1)
+                Robot.model.animate(trajectory1(i,:));
                 if ObjectAttached == 1
-                    UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
+                    UpdateObject = Robot.model.fkine(trajectory1(i,:)).T * trfix;
                     trvert = UpdateObject(1:3,:)';
                     set(Object,'Vertices',trvert);
                 end
                 drawnow;
                 pause(0);
             end
-
-            while UserGui.Lamp_2.Color == [1,0,0]
+            for i = 1:size(trajectory2,1)
+                Robot2.model.animate(trajectory2(i,:));
+                drawnow;
                 pause(0);
             end
-            for i = size(trajectory,1):-1:1
-                Robot.model.animate(trajectory(i,:));
+
+            while UserGui.DoorOpenLamp.Color == [1,0,0]
+                pause(5);
+            end
+            for i = size(trajectory1,1):-1:1
+                Robot.model.animate(trajectory1(i,:));
                 if ObjectAttached == 1
-                    UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
+                    UpdateObject = Robot.model.fkine(trajectory1(i,:)).T * trfix;
                     trvert = UpdateObject(1:3,:)';
                     set(Object,'Vertices',trvert);
                 end
+                drawnow;
+                pause(0);
+            end
+            for i = size(trajectory2,1):-1:1
+                Robot2.model.animate(trajectory2(i,:));
                 drawnow;
                 pause(0);
             end
         end
+        %% **DoorOpen Function***
+        % Brief: Load a passport and animate the slide in entry
+        % Inputs: - Nil
+        % Output: - passport: Return Passport Object
+        %         - PassportVerts: Return Passport Object Data
+        function EStopFunction(UserGui)
+            while UserGui.Lamp_2.Color == [1,0,0]
+                pause(5);
+            end
 
+        end
     end
 end
 
