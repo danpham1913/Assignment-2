@@ -1,4 +1,4 @@
-% ASSIGNMENT 2 MAIN 
+% ASSIGNMENT 2 MAIN
 % Project: Passport stamping using UR3 & VP6242
 % Team: Kent Tran   - 11980099
 %       Serey Te    - 14075814
@@ -14,7 +14,7 @@ hold on;
 PSRFunctions.Environment;
 %% Load Robots
 % Load UR3
-UR3robot = UR3(transl(-0.2,0.20,0.70));
+UR3robot = UR3new(transl(-0.2,0.20,0.70));
 % Load VP6242
 VP6robot = densoVP6242(transl(-0.2,-0.4,0.60)*trotz(-pi/2));
 
@@ -43,49 +43,22 @@ QStampEnd = VP6robot.model.ikcon(transl(-0.29,-0.05,0.72)* troty(pi),VPInitialGu
 
 %% Establish Safety Checks (While loops)
 % Collision Check
-    %SafetyFunctions.CollisionCheck
+%SafetyFunctions.CollisionCheck
 % Emergency Button Check
-    %SafetyFunctions.EmergencyButton
+%SafetyFunctions.EmergencyButton
 % Light Guard
-    %SafetyFunctions.LightGuard
+%SafetyFunctions.LightGuard
 % Door Reed Switch
-    %SafetyFunctions.DoorOpen
+%SafetyFunctions.DoorOpen
 
 %% Perform Tasks
 % Move Robots to operational position for system startup
-        [StartVP0,CurrentStep] = PSRFunctions.moveTo(QVP6Default,QStampStartLift,VP6robot);
-        [StartUR0,CurrentStep] = PSRFunctions.moveTo(QUR3Default,QPassportStart,UR3robot);
+[StartVP0,CurrentStep] = PSRFunctions.moveTo(QVP6Default,QStampStartLift,VP6robot);
+[StartUR0,CurrentStep] = PSRFunctions.moveTo(QUR3Default,QPassportStart,UR3robot);
 
-% Load First Passport
-input('Press enter to Load New Passport')
-[passport,PassportVerts] = PSRFunctions.loadPassport;
+
 passportLoaded = 1;
-
 while passportLoaded == 1
-
-    [MoveUR1,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportStart,QPassportLift,UR3robot,passport,PassportVerts);
-    [MoveUR2,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportLift,QPassportEnd,UR3robot,passport,PassportVerts);
-    [MoveUR2,CurrentStep] = PSRFunctions.moveTo(QPassportEnd,QPassportLift,UR3robot);
-    [moveVP1,CurrentStep] = PSRFunctions.moveTo(QStampStartLift,QStampStart,VP6robot);
-    [moveVP2,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampStart,QStampStartLift,VP6robot,stamp,StampVerts);
-    [moveVP3,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampStartLift,QStampEndLift,VP6robot,stamp,StampVerts);
-    [moveVP4,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampEndLift,QStampEnd,VP6robot,stamp,StampVerts);
-    [moveVP5,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampEnd,QStampEndLift,VP6robot,stamp,StampVerts);
-    [moveVP6,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampEndLift,QStampStartLift,VP6robot,stamp,StampVerts);
-    [moveVP7,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampStartLift,QStampStart,VP6robot,stamp,StampVerts);
-    [moveVP8,CurrentStep] = PSRFunctions.moveTo(QStampStart,QStampStartLift,VP6robot);
-    [MoveUR2,CurrentStep] = PSRFunctions.moveTo(QPassportLift,QPassportEnd,UR3robot);
-    [MoveUR2,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportEnd,QPassportLift,UR3robot,passport,PassportVerts);
-    [MoveUR2,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportLift,QPassportStart,UR3robot,passport,PassportVerts);
-
-    % Animate Passport Removal
-    for i= 1:25
-        delete(passport);
-        passport = PlaceObject('passport_ply.PLY',[(0.15+i*0.006) 0.22 1.00]);
-        drawnow
-        pause(0.1);
-    end
-    delete(passport);
     % Prompt to Load Passport and continue stamping operation
     EnterPassportPrompt = "Load Passport? Y/N: ";
     txt = input(EnterPassportPrompt,"s");
@@ -93,9 +66,34 @@ while passportLoaded == 1
         txt = 'Y';
     end
     if txt == 'y' || txt == 'Y'
+        %Load New Passport
         [passport,PassportVerts] = PSRFunctions.loadPassport;
         passportLoaded = 1;
-    else 
+        %Perform Stamping Motions
+        [MoveUR1,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportStart,QPassportLift,UR3robot,passport,PassportVerts);
+        [MoveUR2,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportLift,QPassportEnd,UR3robot,passport,PassportVerts);
+        [MoveUR2,CurrentStep] = PSRFunctions.moveTo(QPassportEnd,QPassportLift,UR3robot);
+        [moveVP1,CurrentStep] = PSRFunctions.moveTo(QStampStartLift,QStampStart,VP6robot);
+        [moveVP2,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampStart,QStampStartLift,VP6robot,stamp,StampVerts);
+        [moveVP3,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampStartLift,QStampEndLift,VP6robot,stamp,StampVerts);
+        [moveVP4,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampEndLift,QStampEnd,VP6robot,stamp,StampVerts);
+        [moveVP5,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampEnd,QStampEndLift,VP6robot,stamp,StampVerts);
+        [moveVP6,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampEndLift,QStampStartLift,VP6robot,stamp,StampVerts);
+        [moveVP7,CurrentStep,StampVerts] = PSRFunctions.moveTo(QStampStartLift,QStampStart,VP6robot,stamp,StampVerts);
+        [moveVP8,CurrentStep] = PSRFunctions.moveTo(QStampStart,QStampStartLift,VP6robot);
+        [MoveUR2,CurrentStep] = PSRFunctions.moveTo(QPassportLift,QPassportEnd,UR3robot);
+        [MoveUR2,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportEnd,QPassportLift,UR3robot,passport,PassportVerts);
+        [MoveUR2,CurrentStep,PassportVerts] = PSRFunctions.moveTo(QPassportLift,QPassportStart,UR3robot,passport,PassportVerts);
+
+        % Animate Passport Removal
+        for i= 1:25
+            delete(passport);
+            passport = PlaceObject('passport_ply.PLY',[(0.15+i*0.006) 0.22 1.00]);
+            drawnow
+            pause(0.1);
+        end
+        delete(passport);
+    else
         passportLoaded = 0;
     end
 end

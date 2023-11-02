@@ -1,4 +1,4 @@
-classdef UR3 < RobotBaseClass
+classdef UR3new < RobotBaseClass
     %% UR3 Universal Robot 3kg payload robot model
     %
     % WARNING: This model has been created by UTS students in the subject
@@ -7,12 +7,12 @@ classdef UR3 < RobotBaseClass
     % that this matches the real robot!
 
     properties(Access = public)   
-        plyFileNameStem = 'UR3';
+        plyFileNameStem = 'UR3new';
     end
     
     methods
 %% Constructor
-        function self = UR3(baseTr,useTool,toolFilename)
+function self = UR3new(baseTr,useTool,toolFilename)
             if nargin < 3
                 if nargin == 2
                     error('If you set useTool you must pass in the toolFilename as well');
@@ -36,14 +36,14 @@ classdef UR3 < RobotBaseClass
 
 %% CreateModel
         function CreateModel(self)
-            link(1) = Link('d',0.1519,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset',0);
-            link(2) = Link('d',0,'a',-0.24365,'alpha',0,'qlim', deg2rad([-360 360]), 'offset',0);
+            link(1) = Link('d',0.1519,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset',pi);
+            link(2) = Link('d',0,'a',-0.24365,'alpha',0,'qlim', deg2rad([-360 360]), 'offset',-pi/2);
             link(3) = Link('d',0,'a',-0.21325,'alpha',0,'qlim', deg2rad([-360 360]), 'offset', 0);
-            link(4) = Link('d',0.11235,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]),'offset', 0);
-            link(5) = Link('d',0.08535,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360,360]), 'offset',0);
-            link(6) = Link('d',0.0819,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
+            link(4) = Link('d',0.11235,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]),'offset', -pi/2);
+            link(5) = Link('d',0.08535,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360 360]), 'offset',0);
+            link(6) = Link('d',0.0819,'a',0,'alpha',0,'qlim',deg2rad([-360 360]), 'offset', 0);
              
             self.model = SerialLink(link,'name',self.name);
-        end      
+        end
     end
 end
