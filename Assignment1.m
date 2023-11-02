@@ -6,13 +6,78 @@ clear
 %Environment
 Environment
 
-%Robot LinearUR3
+%Robot Denso VP6242
 robot = densoVP6242(transl(-0.2,-0.4,0.60)*trotz(-pi/2));
 robot_q = robot.model.getpos;
 % robot.model.animate(robot_q);
 initial_ee = robot.model.fkine(robot_q);
+
+
+%plot prism
+centerpnt = [-0.2,0.5,1];
+side = 0.5;
+plotOptions.plotFaces = true;
+[vertex,faces,faceNormals] = RectangularPrism([0.1,0.025,0], [-0.5,-0.2,0.69]); %stamping shelf
+[vertex2,faces2,faceNormals2] = RectangularPrism([-0.02,-0.23,0], [-0.35,-0.54,0.60]); %denso VP6242 pillar
+[vertex3,faces3,faceNormals3] = RectangularPrism([-0.15,0.18,0], [-0.35,0.39,0.71]); %UR3 pillar
+[vertex4,faces4,faceNormals4] = RectangularPrism([0.17,0.650,0], [0.13,-0.8,0.95]);
+[vertex5,faces5,faceNormals5] = RectangularPrism([0.17,0.650,1.05], [0.13,-0.8,1.99]);
+axis equal
+camlight
+
+
+%Plot robot collision detection
+robot_tr = zeros(4,4,robot.model.n+1);
+robot_tr(:,:,1) = robot.model.base;
+L = robot.model.links;
+for i = 1 : robot.model.n
+    robot_tr(:,:,i+1) = robot_tr(:,:,i) * trotz(robot_q(i)+L(i).offset) * transl(0,0,L(i).d) * transl(L(i).a,0,0) * trotx(L(i).alpha);
+end
+
+
+%collision detection algorithm
+for i = 1 : size(robot_tr,3)-1    
+    for faceIndex = 1:size(faces,1)
+        vertOnPlane = vertex(faces(faceIndex,1)',:);
+        [intersectP,check] = LinePlaneIntersection(faceNormals(faceIndex,:),vertOnPlane,robot_tr(1:3,4,i)',robot_tr(1:3,4,i+1)'); 
+        if check == 1 && IsIntersectionPointInsideTriangle(intersectP,vertex(faces(faceIndex,:)',:))
+            plot3(intersectP(1),intersectP(2),intersectP(3),'g*');
+            disp('Intersection');
+        end
+    end    
+end
+
+
+
+
+
+
+%Robot UR3
 robot2 = UR3(transl(-0.15,0.20,0.65));
 robot2_q = robot2.model.getpos;
+
+
+%Plot robot collision detection
+robot2_tr = zeros(4,4,robot.model.n+1);
+robot2_tr(:,:,1) = robot.model.base;
+L = robot.model.links;
+for i = 1 : robot.model.n
+    robot2_tr(:,:,i+1) = robot2_tr(:,:,i) * trotz(robot_q(i)+L(i).offset) * transl(0,0,L(i).d) * transl(L(i).a,0,0) * trotx(L(i).alpha);
+end
+
+
+%collision detection algorithm
+for i = 1 : size(robot2_tr,3)-1    
+    for faceIndex = 1:size(faces,1)
+        vertOnPlane = vertex(faces(faceIndex,1)',:);
+        [intersectP,check] = LinePlaneIntersection(faceNormals(faceIndex,:),vertOnPlane,robot2_tr(1:3,4,i)',robot2_tr(1:3,4,i+1)'); 
+        if check == 1 && IsIntersectionPointInsideTriangle(intersectP,vertex(faces(faceIndex,:)',:))
+            plot3(intersectP(1),intersectP(2),intersectP(3),'g*');
+            disp('Intersection');
+        end
+    end    
+end
+
 
 %Placing Passport
 passport = PlaceObject('passport_ply.PLY',[0.15 0.22 1.00]);
@@ -61,33 +126,35 @@ q2Matrix_6 = jtraj(q2_3,q2_2,steps);
 q2Matrix_7 = jtraj(q2_2,q2_1,steps);
 q2Matrix_8 = jtraj(q2_1,robot_q,steps);
 
-% Resolved Motion Rate Control
-steps = 50;
 
-% x1 = [-0.15 0.22 1]';
-% x2 = [0.15 0.22 1]';
-% deltaT = 0.05;                                        % Discrete time step
-% 
-% x = zeros(3,steps);
-% s = lspb(0,1,steps);                                 % Create interpolation scalar
-% for i = 1:steps
-%     x(:,i) = x1*(1-s(i)) + s(i)*x2;                  % Create trajectory in x-y plane
+
+
+% 2.6: Go through until there are no step sizes larger than 1 degree
+% q1 = [-pi/4,0,0];
+% q2 = [pi/4,0,0];
+% steps = 2;
+% while ~isempty(find(1 < abs(diff(rad2deg(jtraj(q1,q2,steps)))),1))
+%     steps = steps + 1;
 % end
-% 
-% 
-% % 3.10
-% for i = 1:steps-1
-%     xdot = (x(:,i+1) - x(:,i))/deltaT;                             % Calculate velocity at discrete time step
-%     J1_1 = robot2.model.jacob0(q1Matrix_1(i,:));            % Get the Jacobian at the current state
-% %     J1_1 = J1_1(1:3,1:3);                          % Take only first 2 rows
-%     qdot = inv(J1_1)*xdot;                             % Solve velocitities via RMRC
-%     q1Matrix_1(i+1,:) =  q1Matrix_1(i,:) + deltaT*qdot';                   % Update next joint state
+% qMatrix = jtraj(q1,q2,steps);
+
+% 2.7
+% result = true(steps,1);
+% for i = 1: steps
+%     result(i) = IsCollision(robot,qMatrix(i,:),faces,vertex,faceNormals,false);
+%     robot.animate(qMatrix(i,:));
+% end
 % end
 
+result = true(steps,1);
 
 %UR3
 for j = 1:size(q1Matrix_1,1)                                             % animate trajectory
     robot2.model.animate(q1Matrix_1(j,:));
+    result(j) = IsCollision(robot2,q1Matrix_1(j,:),faces,vertex,faceNormals,false);
+    result(j) = IsCollision(robot2,q1Matrix_1(j,:),faces2,vertex2,faceNormals2,false);
+    result(j) = IsCollision(robot2,q1Matrix_1(j,:),faces3,vertex3,faceNormals3,false);
+    result(j) = IsCollision(robot2,q1Matrix_1(j,:),faces4,vertex4,faceNormals4,false);
 %     tr = robot2.model.fkine(q1Matrix_1(j,:)).T;
 %     transformVertBrick1 = [vertsb1, ones(size(vertsb1,1),1)]*tr';
 %     set(brick1,'Vertices',transformVertBrick1(:,1:3));
@@ -102,6 +169,12 @@ for j = 1:size(q1Matrix_2,1)                                             % anima
 %     tr = robot2.model.fkine(q1Matrix_1(j,:)).T;
 %     transformVert = [vertspp1, ones(size(vertspp1,1),1)]*tr';
 %     set(passport,'Vertices',transformVert(:,1:3));
+
+    %collision check
+    result(j) = IsCollision(robot2,q1Matrix_2(j,:),faces,vertex,faceNormals,false);
+    result(j) = IsCollision(robot2,q1Matrix_2(j,:),faces2,vertex2,faceNormals2,false);
+    result(j) = IsCollision(robot2,q1Matrix_2(j,:),faces3,vertex3,faceNormals3,false);
+    result(j) = IsCollision(robot2,q1Matrix_2(j,:),faces4,vertex4,faceNormals4,false);
     updatepoint = robot2.model.fkine(q1Matrix_2(j,:)).T * trfix;
     trvert = updatepoint(1:3,:)';
     set(passport,'Vertices',trvert);
@@ -111,6 +184,12 @@ end
 
 for j = 1:size(q1Matrix_3,1)                                             % animate trajectory
     robot2.model.animate(q1Matrix_3(j,:));
+    %collision check
+    result(j) = IsCollision(robot2,q1Matrix_3(j,:),faces,vertex,faceNormals,false);
+    result(j) = IsCollision(robot2,q1Matrix_3(j,:),faces2,vertex2,faceNormals2,false);
+    result(j) = IsCollision(robot2,q1Matrix_3(j,:),faces3,vertex3,faceNormals3,false);
+    result(j) = IsCollision(robot2,q1Matrix_3(j,:),faces4,vertex4,faceNormals4,false);
+
     updatepoint = robot2.model.fkine(q1Matrix_3(j,:)).T * trfix;
     trvert = updatepoint(1:3,:)';
     set(passport,'Vertices',trvert);
@@ -119,16 +198,28 @@ end
 
 for j = 1:size(q1Matrix_4,1)                                             % animate trajectory
     robot2.model.animate(q1Matrix_4(j,:));
+    %collision check
+    result(j) = IsCollision(robot2,q1Matrix_4(j,:),faces,vertex,faceNormals,false);
+    result(j) = IsCollision(robot2,q1Matrix_4(j,:),faces2,vertex2,faceNormals2,false);
+    result(j) = IsCollision(robot2,q1Matrix_4(j,:),faces3,vertex3,faceNormals3,false);
+    result(j) = IsCollision(robot2,q1Matrix_4(j,:),faces4,vertex4,faceNormals4,false);
     drawnow(); 
 end
 
 
 %DensoVP6242
+
+% while ~isempty(find(1 < abs(diff(rad2deg(jtraj(q1,q2,steps)))),1))
+%     steps = steps + 1;
+% end
+
 for j = 1:size(q2Matrix_1,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_1(j,:));
 %     tr = robot2.model.fkine(q1Matrix_1(j,:)).T;
 %     transformVertBrick1 = [vertsb1, ones(size(vertsb1,1),1)]*tr';
 %     set(brick1,'Vertices',transformVertBrick1(:,1:3));
+        result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
+    
     drawnow(); 
 end
 
@@ -140,6 +231,7 @@ for j = 1:size(q2Matrix_2,1)                                             % anima
 %     tr = robot2.model.fkine(q1Matrix_1(j,:)).T;
 %     transformVert = [vertspp1, ones(size(vertspp1,1),1)]*tr';
 %     set(passport,'Vertices',transformVert(:,1:3));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     updatepoint2 = robot.model.fkine(q2Matrix_2(j,:)).T * trfix2;
     trvert2 = updatepoint2(1:3,:)';
     set(stamp,'Vertices',trvert2);
@@ -149,6 +241,7 @@ end
 
 for j = 1:size(q2Matrix_3,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_3(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false); %collision check
     updatepoint2 = robot.model.fkine(q2Matrix_3(j,:)).T * trfix2;
     trvert2 = updatepoint2(1:3,:)';
     set(stamp,'Vertices',trvert2);
@@ -157,6 +250,7 @@ end
 
 for j = 1:size(q2Matrix_4,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_4(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     updatepoint2 = robot.model.fkine(q2Matrix_4(j,:)).T * trfix2;
     trvert2 = updatepoint2(1:3,:)';
     set(stamp,'Vertices',trvert2);
@@ -165,6 +259,7 @@ end
 
 for j = 1:size(q2Matrix_5,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_5(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     updatepoint2 = robot.model.fkine(q2Matrix_5(j,:)).T * trfix2;
     trvert2 = updatepoint2(1:3,:)';
     set(stamp,'Vertices',trvert2);
@@ -173,6 +268,7 @@ end
 
 for j = 1:size(q2Matrix_6,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_6(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     updatepoint2 = robot.model.fkine(q2Matrix_6(j,:)).T * trfix2;
     trvert2 = updatepoint2(1:3,:)';
     set(stamp,'Vertices',trvert2);
@@ -181,6 +277,7 @@ end
 
 for j = 1:size(q2Matrix_7,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_7(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     updatepoint2 = robot.model.fkine(q2Matrix_7(j,:)).T * trfix2;
     trvert2 = updatepoint2(1:3,:)';
     set(stamp,'Vertices',trvert2);
@@ -189,12 +286,13 @@ end
 
 for j = 1:size(q2Matrix_8,1)                                             % animate trajectory
     robot.model.animate(q2Matrix_8(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     drawnow(); 
 end
 
-%UR3 return path
 for j = 1:size(q1Matrix_5,1)                                             % animate trajectory
     robot2.model.animate(q1Matrix_5(j,:));
+    result(j) = IsCollision(robot,q2Matrix_1(j,:),faces,vertex,faceNormals,false);
     drawnow(); 
 end
 
