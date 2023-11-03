@@ -1,6 +1,5 @@
 classdef PSRFunctions
 
-
     properties
     end
 
@@ -166,6 +165,7 @@ classdef PSRFunctions
                 pause(0);
             end
         end
+
         %% **EStop Function***
         % Brief: Load a passport and animate the slide in entry
         % Inputs: - Nil
@@ -176,6 +176,7 @@ classdef PSRFunctions
                 pause(5);
             end
         end
+        
     end
 end
 
