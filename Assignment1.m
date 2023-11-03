@@ -14,14 +14,13 @@ initial_ee = robot.model.fkine(robot_q);
 
 
 %plot prism
-centerpnt = [-0.2,0.5,1];
-side = 0.5;
+
 plotOptions.plotFaces = true;
 [vertex,faces,faceNormals] = RectangularPrism([0.1,0.025,0], [-0.5,-0.2,0.69]); %stamping shelf
 [vertex2,faces2,faceNormals2] = RectangularPrism([-0.02,-0.23,0], [-0.35,-0.54,0.60]); %denso VP6242 pillar
 [vertex3,faces3,faceNormals3] = RectangularPrism([-0.15,0.18,0], [-0.35,0.39,0.71]); %UR3 pillar
-[vertex4,faces4,faceNormals4] = RectangularPrism([0.17,0.650,0], [0.13,-0.8,0.95]);
-[vertex5,faces5,faceNormals5] = RectangularPrism([0.17,0.650,1.05], [0.13,-0.8,1.99]);
+[vertex4,faces4,faceNormals4] = RectangularPrism([0.17,0.650,0], [0.13,-0.8,0.95]); %bottom wall
+[vertex5,faces5,faceNormals5] = RectangularPrism([0.17,0.650,1.05], [0.13,-0.8,1.99]);%top wall
 axis equal
 camlight
 
@@ -145,7 +144,7 @@ q2Matrix_8 = jtraj(q2_1,robot_q,steps);
 %     robot.animate(qMatrix(i,:));
 % end
 % end
-
+% result = collide or not collide 0=collide
 result = true(steps,1);
 
 %UR3
