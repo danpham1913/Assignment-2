@@ -61,7 +61,7 @@ QStampEnd = VP6robot.model.ikcon(transl(-0.29,-0.05,0.72)* troty(pi),VPInitialGu
 % Move Robots to operational position for system startup
 PSRFunctions.moveTo(QVP6Default,QStampStartLift,VP6robot,UR3robot,UserGui);
 PSRFunctions.moveTo(QUR3Default,QPassportStart,UR3robot,VP6robot,UserGui);
-
+        UserGui.SystemStatusEditField.Value = 'System Ready to Start';
 Startup = 1;
 while strcmp(UserGui.SystemSwitch.Value, 'On') || Startup == 1
     % Prompt to Load Passport and continue stamping operation
