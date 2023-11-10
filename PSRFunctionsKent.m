@@ -26,28 +26,32 @@ classdef PSRFunctionsKent
             %Add objects
             PlaceObject('personMaleCasual.ply',[0.85 0 0]);
             PlaceObject('personFemaleBusiness.ply',[1.5 0 0]);
-            PlaceObject('fullroom2_ply (1).PLY',[0 0 1]);
+            PlaceObject('fullroom2final.PLY',[0 0 1]);
             PlaceObject('personMaleOld.ply',[2.25 0 0]);
             PlaceObject('suitcase.ply',[2.25 0 0]);
-            PlaceObject('suitcase2.ply',[0.85 0.25 0]);
+            PlaceObject('suitcase.ply',[0.85 0.25 0]);
             PlaceObject('suitcase.ply',[1.5 1 0]);
             PlaceObject('fireExtinguisher.ply',[0 0.8 0]);
             PlaceObject('emergencyStopButton.ply',[-0.8 -0.8 1]);
             camlight
         end
-                %% **Set Prisms Function***
+        %% **Set Prisms Function***
         % Brief: Function to load environment
-        function [Prismresults] = SetPrisms()
+        function [Prismresults] = SetPrisms(UserGui)
             prismParams = {
-                [0.1, 0.025, 0], [-0.5, -0.2, 0.69]; %Table
-                [-0.02, -0.23, 0], [-0.35, -0.54, 0.60]; %VP Stand
-                [-0.15, 0.18, 0], [-0.35, 0.39, 0.71]; %UR3 Stand
-                [0.17, 0.650, 0], [-0.1, -0.8, 1.05]; %Bottom Front Wall
-                [0.17, 0.650, 1.05], [-0.1, -0.8, 1.99]; %Top Front Wall
+                [0.1, 0.01, 0], [-0.47, -0.18, 0.7]; %Table
+                [-0.02, -0.25, 0], [-0.32, -0.54, 0.60]; %VP Stand
+                [-0.175, 0.265, 0], [-0.375, 0.465, 0.70]; %UR3 Stand
+                [0.17, 0.650, 0], [0.12, -0.8, 1.98]; %Front Wall
+                [0, 0.1, 0.8], [-0.4, -0.25, 0.9];
                 };
-            results = cell(1, 5);
+
+
+
+            
+            results = cell(1, size(prismParams,1));
             % Loop to create and store the results
-            for i = 1:5
+            for i = 1:size(prismParams,1)
                 [vertex, faces, faceNormals] = PSRFunctionsKent.RectangularPrism(prismParams{i, 1}, prismParams{i, 2});
                 results{i} = struct('vertex', vertex, 'faces', faces, 'faceNormals', faceNormals);
             end
@@ -102,13 +106,15 @@ classdef PSRFunctionsKent
                 end
                 if Collisionresult ==1
                     UserGui.CollisionDetectedLamp.Color = [1,0,0];
+                    UserGui.CollisionDetectedLampLabel.Text = 'Collision Detected';
                 else
                     UserGui.CollisionDetectedLamp.Color = [0,1,0];
+                    UserGui.CollisionDetectedLampLabel.Text = 'No Collision Detected';
                 end
                 if ObjectAttached == 1
                     if UserGui.Lamp_2.Color == [1,0,0];
                         PSRFunctionsKent.EStopFunction(UserGui);
-                    elseif UserGui.DoorOpenLamp.Color == [1,0,0];
+                    elseif UserGui.DoorClosedLamp.Color == [1,0,0];
                         PSRFunctionsKent.DoorOpenFunction(Robot,Robot2,UserGui,Object,ObjectVerts)
                     end
                     UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
@@ -177,7 +183,7 @@ classdef PSRFunctionsKent
                 pause(0);
             end
 
-            while UserGui.DoorOpenLamp.Color == [1,0,0]
+            while UserGui.DoorClosedLamp.Color == [1,0,0]
                 pause(5);
             end
             for i = size(trajectory1,1):-1:1
@@ -248,7 +254,7 @@ classdef PSRFunctionsKent
             result = false;
             for qIndex = 1:size(qMatrix,1)
                 % Get the transform of every joint (i.e. start and end of every link)
-                tr = GetLinkPoses(qMatrix(qIndex,:), robot);
+                tr = PSRFunctionsKent.GetLinkPoses(qMatrix(qIndex,:), robot);
 
                 % Go through each link and also each triangle face
                 for i = 1 : size(tr,3)-1
@@ -256,7 +262,6 @@ classdef PSRFunctionsKent
                         vertOnPlane = vertex(faces(faceIndex,1)',:);
                         [intersectP,check] = LinePlaneIntersection(faceNormals(faceIndex,:),vertOnPlane,tr(1:3,4,i)',tr(1:3,4,i+1)');
                         if check == 1 && PSRFunctionsKent.whereIntersect(intersectP,vertex(faces(faceIndex,:)',:))
-                            plot3(intersectP(1),intersectP(2),intersectP(3),'g*');
                             result = true;
                             disp('collision');
                             if returnOnceFound
@@ -268,85 +273,101 @@ classdef PSRFunctionsKent
             end
         end
 
-                %% **IsCollision Function***
+        %% **RectangularPrism Function***
         % Brief: Load a passport and animate the slide in entry
         % Inputs: - Nil
         % Output: - passport: Return Passport Object
         %         - PassportVerts: Return Passport Object Data
         function [vertex,face,faceNormals] = RectangularPrism(lower,upper,plotOptions,axis_h)
-if nargin<4
-        axis_h=gca;
-    if nargin<3
-        plotOptions.plotVerts=false;
-        plotOptions.plotEdges=true;
-        plotOptions.plotFaces=true;
-    end
-end
-hold on
+            if nargin<4
+                axis_h=gca;
+                if nargin<3
+                    plotOptions.plotVerts=false;
+                    plotOptions.plotEdges=true;
+                    plotOptions.plotFaces=true;
+                end
+            end
+            hold on
 
-vertex(1,:)=lower;
-vertex(2,:)=[upper(1),lower(2:3)];
-vertex(3,:)=[upper(1:2),lower(3)];
-vertex(4,:)=[upper(1),lower(2),upper(3)];
-vertex(5,:)=[lower(1),upper(2:3)];
-vertex(6,:)=[lower(1:2),upper(3)];
-vertex(7,:)=[lower(1),upper(2),lower(3)];
-vertex(8,:)=upper;
+            vertex(1,:)=lower;
+            vertex(2,:)=[upper(1),lower(2:3)];
+            vertex(3,:)=[upper(1:2),lower(3)];
+            vertex(4,:)=[upper(1),lower(2),upper(3)];
+            vertex(5,:)=[lower(1),upper(2:3)];
+            vertex(6,:)=[lower(1:2),upper(3)];
+            vertex(7,:)=[lower(1),upper(2),lower(3)];
+            vertex(8,:)=upper;
 
-face=[1,2,3;1,3,7;
-     1,6,5;1,7,5;
-     1,6,4;1,4,2;
-     6,4,8;6,5,8;
-     2,4,8;2,3,8;
-     3,7,5;3,8,5;
-     6,5,8;6,4,8];
+            face=[1,2,3;1,3,7;
+                1,6,5;1,7,5;
+                1,6,4;1,4,2;
+                6,4,8;6,5,8;
+                2,4,8;2,3,8;
+                3,7,5;3,8,5;
+                6,5,8;6,4,8];
 
-if 2 < nargout    
-    faceNormals = zeros(size(face,1),3);
-    for faceIndex = 1:size(face,1)
-        v1 = vertex(face(faceIndex,1)',:);
-        v2 = vertex(face(faceIndex,2)',:);
-        v3 = vertex(face(faceIndex,3)',:);
-        faceNormals(faceIndex,:) = unit(cross(v2-v1,v3-v1));
-    end
-end
-%% If plot verticies
-if isfield(plotOptions,'plotVerts') && plotOptions.plotVerts
-    for i=1:size(vertex,1);
-        plot3(vertex(i,1),vertex(i,2),vertex(i,3),'r*');
-        text(vertex(i,1),vertex(i,2),vertex(i,3),num2str(i));
-    end
-end
+            if 2 < nargout
+                faceNormals = zeros(size(face,1),3);
+                for faceIndex = 1:size(face,1)
+                    v1 = vertex(face(faceIndex,1)',:);
+                    v2 = vertex(face(faceIndex,2)',:);
+                    v3 = vertex(face(faceIndex,3)',:);
+                    faceNormals(faceIndex,:) = unit(cross(v2-v1,v3-v1));
+                end
+            end
+            %% If plot verticies
+            if isfield(plotOptions,'plotVerts') && plotOptions.plotVerts
+                for i=1:size(vertex,1);
+                    plot3(vertex(i,1),vertex(i,2),vertex(i,3),'r*');
+                    text(vertex(i,1),vertex(i,2),vertex(i,3),num2str(i));
+                end
+            end
 
-%% If you want to plot the edg
-if isfield(plotOptions,'plotEdges') && plotOptions.plotEdges
-    links=[1,2;
-        2,3;
-        3,7;
-        7,1;
-        1,6;
-        5,6;
-        5,7;
-        4,8;
-        5,8;
-        6,4;
-        4,2;
-        8,3];
+            %% If you want to plot the edg
+            if isfield(plotOptions,'plotEdges') && plotOptions.plotEdges
+                links=[1,2;
+                    2,3;
+                    3,7;
+                    7,1;
+                    1,6;
+                    5,6;
+                    5,7;
+                    4,8;
+                    5,8;
+                    6,4;
+                    4,2;
+                    8,3];
 
-    for i=1:size(links,1)
-        plot3(axis_h,[vertex(links(i,1),1),vertex(links(i,2),1)],...
-            [vertex(links(i,1),2),vertex(links(i,2),2)],...
-            [vertex(links(i,1),3),vertex(links(i,2),3)],'k')
-    end
-end
+                for i=1:size(links,1)
+                    plot3(axis_h,[vertex(links(i,1),1),vertex(links(i,2),1)],...
+                        [vertex(links(i,1),2),vertex(links(i,2),2)],...
+                        [vertex(links(i,1),3),vertex(links(i,2),3)],'k')
+                end
+            end
 
-if isfield(plotOptions,'plotFaces') && plotOptions.plotFaces
-    tcolor = [.2 .2 .8];
-    
-    patch('Faces',face,'Vertices',vertex,'FaceVertexCData',tcolor,'FaceColor','flat','lineStyle','none');
-end
+            if isfield(plotOptions,'plotFaces') && plotOptions.plotFaces
+                tcolor = [.2 .2 .8];
 
-end
+                patch('Faces',face,'Vertices',vertex,'FaceVertexCData',tcolor,'FaceColor','flat','lineStyle','none');
+            end
+
+        end
+        function [transforms] = GetLinkPoses(q,robot)
+
+            links = robot.model.links;
+            transforms = zeros(4, 4, length(links) + 1);
+            transforms(:,:,1) = robot.model.base;
+
+            for i = 1:length(links)
+                L = links(1,i);
+
+                current_transform = transforms(:,:, i);
+
+                current_transform = current_transform * trotz(q(1,i) + L.offset) * ...
+                    transl(0,0, L.d) * transl(L.a,0,0) * trotx(L.alpha);
+                transforms(:,:,i + 1) = current_transform;
+            end
+        end
     end
 end
 

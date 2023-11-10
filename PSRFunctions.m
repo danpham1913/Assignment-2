@@ -7,7 +7,7 @@ classdef PSRFunctions
         %% **Environment Function***
         % Brief: Function to load environment
         function Environment()
-            hold on
+            hold on;
             %Set up workspace
             axis ([-2 4 -1.5 1.5 0 3])
             axis equal;
@@ -31,7 +31,7 @@ classdef PSRFunctions
             PlaceObject('door.PLY',[0 0 1]);
             PlaceObject('personMaleOld.ply',[2.25 0 0]);
             PlaceObject('suitcase.ply',[2.25 0 0]);
-            PlaceObject('suitcase2.ply',[0.85 0.25 0]);
+            PlaceObject('suitcase.ply',[0.85 0.25 0]);
             PlaceObject('suitcase.ply',[1.5 1 0]);
             PlaceObject('fireExtinguisher.ply',[0 -0.9 0]);
             PlaceObject('emergencyStopButton.ply',[-0.8 -0.8 1]);
@@ -76,7 +76,7 @@ classdef PSRFunctions
                 if ObjectAttached == 1
                     if UserGui.Lamp_2.Color == [1,0,0]
                         PSRFunctions.EStopFunction(UserGui);
-                    elseif UserGui.DoorOpenLamp.Color == [1,0,0]
+                    elseif UserGui.DoorClosedLamp.Color == [1,0,0]
                         PSRFunctions.DoorOpenFunction(Robot,Robot2,UserGui,Object,ObjectVerts)
                     end
                     UpdateObject = Robot.model.fkine(trajectory(i,:)).T * trfix;
@@ -146,7 +146,7 @@ classdef PSRFunctions
                 pause(0);
             end
 
-            while UserGui.DoorOpenLamp.Color == [1,0,0]
+            while UserGui.DoorClosedLamp.Color == [1,0,0]
                 pause(5);
             end
             for i = size(trajectory1,1):-1:1
@@ -176,7 +176,7 @@ classdef PSRFunctions
                 pause(5);
             end
         end
-        
+
     end
 end
 

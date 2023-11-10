@@ -68,7 +68,7 @@ while strcmp(UserGui.SystemSwitch.Value, 'On') || Startup == 1
     if strcmp(UserGui.SystemSwitch.Value, 'On')
         Startup = 0;
     end
-    if UserGui.DoorOpenLamp.Color == [1,0,0];
+    if UserGui.DoorClosedLamp.Color == [1,0,0];
         PSRFunctions.DoorOpenFunction(VP6robot,UR3robot,UserGui);
     end
     if strcmp(UserGui.SystemSwitch.Value, 'On') && UserGui.LoadNewPassportsButton.Value == 0
